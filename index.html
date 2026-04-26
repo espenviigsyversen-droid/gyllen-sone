@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gyllen Sone">
+<meta name="theme-color" content="#1a1a2e">
+<title>Gyllen Sone – Intervalltreningstracker</title>
+<style>
+  :root {
+    --gold: #f5a623;
+    --gold-light: #ffd97a;
+    --gold-dark: #c47d0e;
+    --bg: #0f0f1a;
+    --surface: #1a1a2e;
+    --surface2: #16213e;
+    --surface3: #0d1b2a;
+    --text: #f0ece0;
+    --text2: #a09880;
+    --text3: #6b6455;
+    --green: #4caf8a;
+    --red: #e05b5b;
+    --blue: #5b9de0;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --font: -apple-system, 'SF Pro Text', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+  }
+  .header {
+    background: linear-gradient(160deg, #1a1a2e 60%, #2a1a0e);
+    padding: 54px 20px 20px;
+    border-bottom: 1px solid rgba(245,166,35,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .app-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--gold);
+  }
+  .app-sub {
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: 0.3px;
+  }
+  .zone-badge {
+    background: rgba(245,166,35,0.15);
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold);
+  }
+  .nav {
+    display: flex;
+    gap: 0;
+    background: var(--surface);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: sticky;
+    top: 90px;
+    z-index: 99;
+  }
+  .nav-btn {
+    flex: 1;
+    padding: 12px 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    font-family: var(--font);
+  }
+  .nav-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  /* INNSTILLINGER */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 14px;
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .input-row:last-child { border-bottom: none; }
+  .input-label {
+    font-size: 14px;
+    color: var(--text2);
+    flex: 1;
+  }
+  .input-label small {
+    display: block;
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+  input[type="number"] {
+    width: 72px;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    padding: 8px 6px;
+    font-family: var(--font);
+    -webkit-appearance: none;
+    outline: none;
+  }
+  input[type="number"]:focus {
+    border-color: var(--gold);
+  }
+  select {
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 14px;
+    padding: 8px 10px;
+    font-family: var(--font);
+    outline: none;
+    -webkit-appearance: none;
+    min-width: 120px;
+    text-align: center;
+  }
+  .zone-display {
+    background: linear-gradient(135deg, rgba(245,166,35,0.12), rgba(245,166,35,0.05));
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-top: 4px;
+  }
+  .zone-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .zone-row:last-child { margin-bottom: 0; }
+  .zone-label { font-size: 13px; color: var(--text2); }
+  .zone-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .zone-value span { font-size: 12px; font-weight: 400; color: var(--text3); margin-left: 4px; }
+  .zone-bar {
+    height: 8px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    margin: 12px 0 8px;
+    position: relative;
+    overflow: visible;
+  }
+  .zone-bar-fill {
+    position: absolute;
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
+  .zone-bar-min, .zone-bar-max {
+    position: absolute;
+    top: -16px;
+    font-size: 10px;
+    color: var(--text3);
+    transform: translateX(-50%);
+  }
+  .zone-bar-max { transform: translateX(-50%); }
+
+  /* NY ØKT */
+  .session-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .session-opt {
+    background: var(--surface);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    padding: 14px 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .session-opt:active { transform: scale(0.97); }
+  .session-opt.selected {
+    border-color: var(--gold);
+    background: rgba(245,166,35,0.08);
+  }
+  .session-opt-icon {
+    font-size: 22px;
+    margin-bottom: 6px;
+  }
+  .session-opt-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .session-opt-sub {
+    font-size: 10px;
+    color: var(--text3);
+  }
+  .interval-grid {
+    display: grid;
+    gap: 10px;
+  }
+  .interval-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+  }
+  .interval-header {
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .interval-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+  }
+  .interval-label.myk {
+    color: var(--gold);
+  }
+  .interval-body {
+    padding: 10px 14px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .field-group {
+    flex: 1;
+  }
+  .field-label {
+    font-size: 10px;
+    color: var(--text3);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  input.field-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    padding: 8px 4px;
+    font-family: var(--font);
+    -webkit-appearance: none;
+    outline: none;
+  }
+  input.field-input:focus { border-color: var(--gold); }
+  .pulse-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+  .btn-primary {
+    width: 100%;
+    background: var(--gold);
+    color: #1a1100;
+    border: none;
+    border-radius: var(--radius);
+    padding: 15px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font);
+    letter-spacing: 0.2px;
+    transition: all 0.15s;
+    margin-top: 16px;
+  }
+  .btn-primary:active { transform: scale(0.98); background: var(--gold-dark); }
+  .btn-secondary {
+    width: 100%;
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius);
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--font);
+    margin-top: 8px;
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 10px;
+    margin-top: 4px;
+  }
+  .speed-row {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .speed-label { font-size: 13px; color: var(--text2); }
+  .speed-value { font-size: 16px; font-weight: 700; color: var(--gold); }
+
+  /* HISTORIKK */
+  .history-item {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .history-item:active { transform: scale(0.99); }
+  .history-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .history-type {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .history-date {
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .history-stats {
+    display: flex;
+    gap: 16px;
+  }
+  .hstat {
+    text-align: left;
+  }
+  .hstat-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .hstat-value {
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-top: 8px;
+  }
+  .status-ok { background: rgba(76,175,138,0.15); color: var(--green); }
+  .status-over { background: rgba(224,91,91,0.15); color: var(--red); }
+  .status-under { background: rgba(91,157,224,0.15); color: var(--blue); }
+  .status-nodata { background: rgba(255,255,255,0.06); color: var(--text3); }
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text3);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-text { font-size: 14px; }
+
+  /* PROGRESJON */
+  .prog-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .prog-filter {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .prog-filter::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--text3);
+    white-space: nowrap;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.15s;
+  }
+  .filter-btn.active {
+    background: rgba(245,166,35,0.12);
+    border-color: rgba(245,166,35,0.4);
+    color: var(--gold);
+  }
+  .chart-area {
+    height: 160px;
+    position: relative;
+    margin: 8px 0;
+  }
+  svg.line-chart { width: 100%; height: 100%; }
+  .chart-label {
+    font-size: 10px;
+    fill: var(--text3);
+  }
+  .no-chart {
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text3);
+    font-size: 13px;
+  }
+  .avg-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .avg-stat {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .avg-stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; }
+  .avg-stat-value { font-size: 18px; font-weight: 700; color: var(--text); margin-top: 4px; }
+
+  /* DETAIL VIEW */
+  .detail-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    display: none;
+  }
+  .detail-overlay.open { display: flex; }
+  .detail-sheet {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 16px;
+  }
+  .detail-handle {
+    width: 36px;
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .detail-title { font-size: 16px; font-weight: 700; color: var(--gold); margin-bottom: 14px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .detail-cell {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+  }
+  .detail-cell-label { font-size: 10px; color: var(--text3); margin-bottom: 4px; }
+  .detail-cell-val { font-size: 15px; font-weight: 600; }
+  .detail-close {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: none;
+    border-radius: var(--radius);
+    padding: 12px;
+    color: var(--text2);
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 14px;
+    font-family: var(--font);
+  }
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(76,175,138,0.9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 300;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: rgba(26,26,46,0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    z-index: 150;
+  }
+  .bottom-nav-btn {
+    flex: 1;
+    padding: 10px 4px 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font);
+  }
+  .bottom-nav-icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+  .bottom-nav-label {
+    font-size: 10px;
+    color: var(--text3);
+    font-weight: 500;
+  }
+  .bottom-nav-btn.active .bottom-nav-label { color: var(--gold); }
+  .delete-btn {
+    background: rgba(224,91,91,0.12);
+    border: 1px solid rgba(224,91,91,0.25);
+    color: var(--red);
+    border-radius: var(--radius-sm);
+    padding: 6px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="app-title">Gyllen Sone 🏃</div>
+      <div class="app-sub">Intervalltreningstracker</div>
+    </div>
+    <div class="zone-badge" id="header-zone">– / – bpm</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('innstillinger', this)">Innstillinger</button>
+  <button class="nav-btn" onclick="showPage('ny-okt', this)">Ny økt</button>
+  <button class="nav-btn" onclick="showPage('historikk', this)">Historikk</button>
+  <button class="nav-btn" onclick="showPage('progresjon', this)">Progresjon</button>
+</nav>
+
+<!-- INNSTILLINGER -->
+<div id="innstillinger" class="page active">
+  <div class="card">
+    <div class="card-title">Mine innstillinger</div>
+    <div class="input-row">
+      <div class="input-label">Makspuls<small>slag/min</small></div>
+      <input type="number" id="maxpuls" value="187" min="100" max="250" onchange="saveSettings(); updateZone()">
+    </div>
+    <div class="input-row">
+      <div class="input-label">Treningstatus<small>Påvirker sonegrensene</small></div>
+      <select id="treningsnivaa" onchange="updateNivaa()">
+        <option value="ikke-trent">Ikke godt trent</option>
+        <option value="godt-trent">Godt trent</option>
+        <option value="custom">Tilpasning</option>
+      </select>
+    </div>
+    <div class="input-row" id="custom-min-row" style="display:none;">
+      <div class="input-label">Min % av makspuls<small>Nedre sonegrense</small></div>
+      <input type="number" id="zone-min-pct" value="77" min="50" max="99" onchange="saveSettings(); updateZone()">
+    </div>
+    <div class="input-row" id="custom-max-row" style="display:none;">
+      <div class="input-label">Maks % av makspuls<small>Øvre sonegrense</small></div>
+      <input type="number" id="zone-max-pct" value="84" min="51" max="100" onchange="saveSettings(); updateZone()">
+    </div>
+  </div>
+
+  <div class="zone-display">
+    <div class="card-title" style="margin-bottom:12px;">Din gylne sone</div>
+    <div class="zone-bar">
+      <div class="zone-bar-fill" id="zone-bar-fill" style="left:77%;width:7%;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:14px;">
+      <span>50%</span><span>60%</span><span>70%</span><span>80%</span><span>90%</span><span>100%</span>
+    </div>
+    <div class="zone-row">
+      <div class="zone-label">Nedre grense</div>
+      <div class="zone-value" id="zone-lower">144<span>bpm</span></div>
+    </div>
+    <div class="zone-row">
+      <div class="zone-label">Øvre grense</div>
+      <div class="zone-value" id="zone-upper">157<span>bpm</span></div>
+    </div>
+    <div class="zone-row" style="padding-top:10px;border-top:1px solid rgba(245,166,35,0.2);margin-top:4px;">
+      <div class="zone-label" style="font-weight:600;">Midtpunkt (sikt mot dette)</div>
+      <div class="zone-value" style="color:var(--gold-light);font-size:24px;" id="zone-mid">151<span>bpm</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <div class="card-title">Kilde</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.6;">
+      Marius Bakken – <em>Løping! Raskere og skadefri for alle nivåer</em><br>
+      <span style="color:var(--text3);font-size:11px;">Ikke godt trent: 77–84% | Godt trent: 80–87%</span>
+    </div>
+  </div>
+</div>
+
+<!-- NY ØKT -->
+<div id="ny-okt" class="page">
+  <div class="section-title">Velg økttype</div>
+  <div class="session-picker">
+    <div class="session-opt selected" onclick="selectSession(0, this)">
+      <div class="session-opt-icon">🔥</div>
+      <div class="session-opt-title">6×6 min</div>
+      <div class="session-opt-sub">1 min pause</div>
+    </div>
+    <div class="session-opt" onclick="selectSession(1, this)">
+      <div class="session-opt-icon">💪</div>
+      <div class="session-opt-title">4×10 min</div>
+      <div class="session-opt-sub">90 sek pause</div>
+    </div>
+    <div class="session-opt" onclick="selectSession(2, this)">
+      <div class="session-opt-icon">⚡</div>
+      <div class="session-opt-title">6×5 min</div>
+      <div class="session-opt-sub">45 sek pause</div>
+    </div>
+    <div class="session-opt" onclick="selectSession(3, this)">
+      <div class="session-opt-icon">🚀</div>
+      <div class="session-opt-title">15×45 sek</div>
+      <div class="session-opt-sub">15 sek pause</div>
+    </div>
+  </div>
+
+  <div class="section-title">Fart for hele økten</div>
+  <div class="speed-row">
+    <div class="speed-label">Fart (km/t)</div>
+    <input type="number" id="session-speed" value="" placeholder="f.eks. 11.5" step="0.1" min="4" max="25"
+      style="width:90px;background:var(--surface2);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-size:18px;font-weight:600;text-align:center;padding:8px;font-family:var(--font);outline:none;">
+  </div>
+  <div style="font-size:11px;color:var(--text3);margin:-6px 0 12px 4px;">Første og siste intervall løpes litt roligere enn resten</div>
+
+  <div class="section-title">Pulsmåling per intervall</div>
+  <div class="interval-grid" id="interval-inputs"></div>
+
+  <button class="btn-primary" onclick="saveSession()">Lagre økt ✓</button>
+  <button class="btn-secondary" onclick="clearForm()">Tøm skjema</button>
+</div>
+
+<!-- HISTORIKK -->
+<div id="historikk" class="page">
+  <div id="history-list"></div>
+</div>
+
+<!-- PROGRESJON -->
+<div id="progresjon" class="page">
+  <div class="prog-filter">
+    <button class="filter-btn active" onclick="filterProg(0, this)">Alle</button>
+    <button class="filter-btn" onclick="filterProg(1, this)">6×6 min</button>
+    <button class="filter-btn" onclick="filterProg(2, this)">4×10 min</button>
+    <button class="filter-btn" onclick="filterProg(3, this)">6×5 min</button>
+    <button class="filter-btn" onclick="filterProg(4, this)">15×45 sek</button>
+  </div>
+
+  <div class="prog-card">
+    <div class="card-title">Snittspuls over tid</div>
+    <div class="chart-area" id="prog-chart-area">
+      <div class="no-chart">Ingen data ennå – logg noen økter!</div>
+    </div>
+  </div>
+
+  <div class="prog-card">
+    <div class="card-title">Statistikk</div>
+    <div class="avg-row">
+      <div class="avg-stat">
+        <div class="avg-stat-label">Antall økter</div>
+        <div class="avg-stat-value" id="stat-count">0</div>
+      </div>
+      <div class="avg-stat">
+        <div class="avg-stat-label">Snitt puls</div>
+        <div class="avg-stat-value" id="stat-avg-pulse">–</div>
+      </div>
+      <div class="avg-stat">
+        <div class="avg-stat-label">I sonen</div>
+        <div class="avg-stat-value" id="stat-in-zone">–</div>
+      </div>
+    </div>
+    <div class="avg-row" style="margin-top:0;">
+      <div class="avg-stat">
+        <div class="avg-stat-label">Snitt fart</div>
+        <div class="avg-stat-value" id="stat-avg-speed">–</div>
+      </div>
+      <div class="avg-stat">
+        <div class="avg-stat-label">Beste puls</div>
+        <div class="avg-stat-value" id="stat-best">–</div>
+      </div>
+      <div class="avg-stat">
+        <div class="avg-stat-label">Siste økt</div>
+        <div class="avg-stat-value" id="stat-last">–</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+  <div class="detail-sheet" id="detail-sheet">
+    <div class="detail-handle"></div>
+    <div class="detail-title" id="detail-title"></div>
+    <div id="detail-body"></div>
+    <button class="detail-close" onclick="closeDetail()">Lukk</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SESSIONS = [
+  { name: '6×6 min', icon: '🔥', pause: '1 min', intervals: 6, label: '6×6 min | 1 min pause' },
+  { name: '4×10 min', icon: '💪', pause: '90 sek', intervals: 4, label: '4×10 min | 90 sek pause' },
+  { name: '6×5 min', icon: '⚡', pause: '45 sek', intervals: 6, label: '6×5 min | 45 sek pause' },
+  { name: '15×45 sek', icon: '🚀', pause: '15 sek', intervals: 15, label: '15×45 sek | 15 sek pause', sameSpeed: true }
+];
+
+let currentSession = 0;
+let settings = { maxpuls: 187, niva: 'ikke-trent', minPct: 77, maxPct: 84 };
+let sessions = [];
+let progFilter = 0;
+
+function load() {
+  const s = localStorage.getItem('gs_settings');
+  if (s) settings = JSON.parse(s);
+  const d = localStorage.getItem('gs_sessions');
+  if (d) sessions = JSON.parse(d);
+  applySettings();
+  updateZone();
+  buildIntervalInputs();
+  renderHistory();
+  renderProgression();
+}
+
+function saveSettings() {
+  settings.maxpuls = parseInt(document.getElementById('maxpuls').value) || 187;
+  if (settings.niva === 'custom') {
+    settings.minPct = parseInt(document.getElementById('zone-min-pct').value) || 77;
+    settings.maxPct = parseInt(document.getElementById('zone-max-pct').value) || 84;
+  }
+  localStorage.setItem('gs_settings', JSON.stringify(settings));
+}
+
+function applySettings() {
+  document.getElementById('maxpuls').value = settings.maxpuls;
+  document.getElementById('treningsnivaa').value = settings.niva;
+  document.getElementById('zone-min-pct').value = settings.minPct;
+  document.getElementById('zone-max-pct').value = settings.maxPct;
+  updateNivaa(true);
+}
+
+function updateNivaa(silent) {
+  const val = document.getElementById('treningsnivaa').value;
+  settings.niva = val;
+  if (val === 'ikke-trent') { settings.minPct = 77; settings.maxPct = 84; }
+  else if (val === 'godt-trent') { settings.minPct = 80; settings.maxPct = 87; }
+  document.getElementById('custom-min-row').style.display = val === 'custom' ? '' : 'none';
+  document.getElementById('custom-max-row').style.display = val === 'custom' ? '' : 'none';
+  document.getElementById('zone-min-pct').value = settings.minPct;
+  document.getElementById('zone-max-pct').value = settings.maxPct;
+  if (!silent) { saveSettings(); updateZone(); }
+}
+
+function updateZone() {
+  const mp = settings.maxpuls;
+  const lo = Math.round(mp * settings.minPct / 100);
+  const hi = Math.round(mp * settings.maxPct / 100);
+  const mid = Math.round((lo + hi) / 2);
+  document.getElementById('zone-lower').innerHTML = lo + '<span>bpm</span>';
+  document.getElementById('zone-upper').innerHTML = hi + '<span>bpm</span>';
+  document.getElementById('zone-mid').innerHTML = mid + '<span>bpm</span>';
+  document.getElementById('header-zone').textContent = lo + ' / ' + hi + ' bpm';
+  const pct = settings.minPct / 100;
+  const width = (settings.maxPct - settings.minPct) / 100;
+  document.getElementById('zone-bar-fill').style.left = (pct * 100) + '%';
+  document.getElementById('zone-bar-fill').style.width = (width * 100) + '%';
+  renderProgression();
+}
+
+function getZone() {
+  const mp = settings.maxpuls;
+  return {
+    lo: Math.round(mp * settings.minPct / 100),
+    hi: Math.round(mp * settings.maxPct / 100)
+  };
+}
+
+function selectSession(idx, el) {
+  currentSession = idx;
+  document.querySelectorAll('.session-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  buildIntervalInputs();
+}
+
+function buildIntervalInputs() {
+  const s = SESSIONS[currentSession];
+  const container = document.getElementById('interval-inputs');
+  container.innerHTML = '';
+  const n = s.intervals;
+  for (let i = 0; i < n; i++) {
+    const isMyk = i === 0 || i === n - 1;
+    const label = i === 0 ? 'Intervall 1 (myk start)' : i === n - 1 ? `Intervall ${n} (myk landing)` : `Intervall ${i + 1}`;
+    const div = document.createElement('div');
+    div.className = 'interval-card';
+    div.innerHTML = `
+      <div class="interval-header">
+        <span class="interval-label${isMyk ? ' myk' : ''}">${label}</span>
+        ${isMyk ? '<span style="font-size:10px;color:var(--gold);opacity:0.7;">litt roligere</span>' : ''}
+      </div>
+      <div class="interval-body">
+        <div class="field-group">
+          <div class="field-label">Puls (bpm)</div>
+          <input class="field-input" type="number" id="pulse-${i}" placeholder="–" min="50" max="230" inputmode="numeric">
+        </div>
+      </div>`;
+    container.appendChild(div);
+  }
+}
+
+function saveSession() {
+  const s = SESSIONS[currentSession];
+  const n = s.intervals;
+  const speed = parseFloat(document.getElementById('session-speed').value) || null;
+  const pulses = [];
+  for (let i = 0; i < n; i++) {
+    const v = parseInt(document.getElementById('pulse-' + i).value);
+    pulses.push(isNaN(v) ? null : v);
+  }
+  const coreIdxs = n <= 2 ? [0] : Array.from({length: n - 2}, (_, i) => i + 1);
+  const corePulses = coreIdxs.map(i => pulses[i]).filter(v => v !== null);
+  const avgPulse = corePulses.length ? Math.round(corePulses.reduce((a, b) => a + b, 0) / corePulses.length) : null;
+  const z = getZone();
+  let status = 'nodata';
+  if (avgPulse !== null) {
+    if (avgPulse < z.lo) status = 'under';
+    else if (avgPulse > z.hi) status = 'over';
+    else status = 'ok';
+  }
+  const entry = {
+    id: Date.now(),
+    sessionType: currentSession,
+    date: new Date().toISOString(),
+    speed,
+    pulses,
+    avgPulse,
+    status,
+    zone: { lo: z.lo, hi: z.hi }
+  };
+  sessions.unshift(entry);
+  localStorage.setItem('gs_sessions', JSON.stringify(sessions));
+  showToast('Økt lagret! 🎯');
+  clearForm();
+  renderHistory();
+  renderProgression();
+  showPage('historikk', document.querySelectorAll('.nav-btn')[2]);
+}
+
+function clearForm() {
+  document.getElementById('session-speed').value = '';
+  buildIntervalInputs();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'historikk') renderHistory();
+  if (id === 'progresjon') renderProgression();
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (!sessions.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Ingen økter logget ennå.<br>Start med å logge din første økt!</div></div>';
+    return;
+  }
+  list.innerHTML = sessions.map((e, idx) => {
+    const s = SESSIONS[e.sessionType];
+    const dateStr = new Date(e.date).toLocaleDateString('no-NO', {weekday:'short', day:'numeric', month:'short'});
+    const statusMap = { ok: ['status-ok', '✓ I sonen'], over: ['status-over', '↑ Over sonen'], under: ['status-under', '↓ Under sonen'], nodata: ['status-nodata', '– Ingen data'] };
+    const [cls, txt] = statusMap[e.status] || statusMap.nodata;
+    const pulseColor = e.status === 'ok' ? 'var(--green)' : e.status === 'over' ? 'var(--red)' : e.status === 'under' ? 'var(--blue)' : 'var(--text)';
+    return `<div class="history-item" onclick="showDetail(${idx})">
+      <div class="history-top">
+        <div class="history-type">${s.icon} ${s.label}</div>
+        <div class="history-date">${dateStr}</div>
+      </div>
+      <div class="history-stats">
+        <div class="hstat">
+          <div class="hstat-label">Snitt puls</div>
+          <div class="hstat-value" style="color:${pulseColor}">${e.avgPulse ? e.avgPulse + ' bpm' : '–'}</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-label">Fart</div>
+          <div class="hstat-value">${e.speed ? e.speed + ' km/t' : '–'}</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-label">Sone</div>
+          <div class="hstat-value" style="font-size:12px;">${e.zone.lo}–${e.zone.hi}</div>
+        </div>
+      </div>
+      <span class="status-badge ${cls}">${txt}</span>
+    </div>`;
+  }).join('');
+}
+
+function showDetail(idx) {
+  const e = sessions[idx];
+  const s = SESSIONS[e.sessionType];
+  const dateStr = new Date(e.date).toLocaleDateString('no-NO', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('detail-title').textContent = s.icon + ' ' + s.label;
+  const pulses = e.pulses.map((p, i) => {
+    const isMyk = i === 0 || i === s.intervals - 1;
+    const label = i === 0 ? 'Int 1 (start)' : i === s.intervals - 1 ? `Int ${s.intervals} (landing)` : `Intervall ${i + 1}`;
+    return `<div class="detail-cell">
+      <div class="detail-cell-label">${label}${isMyk ? ' 🟡' : ''}</div>
+      <div class="detail-cell-val">${p ? p + ' bpm' : '–'}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('detail-body').innerHTML = `
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;">${dateStr}</div>
+    <div class="detail-grid" style="margin-bottom:12px;">
+      <div class="detail-cell"><div class="detail-cell-label">Fart</div><div class="detail-cell-val">${e.speed ? e.speed + ' km/t' : '–'}</div></div>
+      <div class="detail-cell"><div class="detail-cell-label">Snitt puls (kjerne)</div><div class="detail-cell-val" style="color:${e.status==='ok'?'var(--green)':e.status==='over'?'var(--red)':'var(--blue)'}">${e.avgPulse ? e.avgPulse + ' bpm' : '–'}</div></div>
+      <div class="detail-cell"><div class="detail-cell-label">Sone</div><div class="detail-cell-val">${e.zone.lo}–${e.zone.hi}</div></div>
+      <div class="detail-cell"><div class="detail-cell-label">Status</div><div class="detail-cell-val" style="font-size:13px;">${{ok:'✓ I sonen',over:'↑ Over',under:'↓ Under',nodata:'–'}[e.status]}</div></div>
+    </div>
+    <div class="card-title" style="margin-bottom:8px;">Puls per intervall</div>
+    <div class="detail-grid">${pulses}</div>
+    <div style="margin-top:14px;text-align:right;">
+      <button class="delete-btn" onclick="deleteSession(${idx})">Slett økt</button>
+    </div>`;
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+function deleteSession(idx) {
+  if (confirm('Slette denne økten?')) {
+    sessions.splice(idx, 1);
+    localStorage.setItem('gs_sessions', JSON.stringify(sessions));
+    closeDetail();
+    renderHistory();
+    renderProgression();
+    showToast('Økt slettet');
+  }
+}
+
+function closeDetail(e) {
+  if (!e || e.target === document.getElementById('detail-overlay')) {
+    document.getElementById('detail-overlay').classList.remove('open');
+  }
+}
+
+function filterProg(idx, btn) {
+  progFilter = idx;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProgression();
+}
+
+function renderProgression() {
+  const filtered = progFilter === 0 ? sessions : sessions.filter(e => e.sessionType === progFilter - 1);
+  const sorted = [...filtered].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const z = getZone();
+
+  document.getElementById('stat-count').textContent = filtered.length;
+  const withPulse = filtered.filter(e => e.avgPulse);
+  if (withPulse.length) {
+    const avg = Math.round(withPulse.reduce((a, e) => a + e.avgPulse, 0) / withPulse.length);
+    const inZone = withPulse.filter(e => e.avgPulse >= z.lo && e.avgPulse <= z.hi).length;
+    const speeds = filtered.filter(e => e.speed).map(e => e.speed);
+    const best = withPulse.find(e => e.avgPulse >= z.lo && e.avgPulse <= z.hi);
+    document.getElementById('stat-avg-pulse').textContent = avg + ' bpm';
+    document.getElementById('stat-in-zone').textContent = Math.round(inZone / withPulse.length * 100) + '%';
+    document.getElementById('stat-avg-speed').textContent = speeds.length ? (speeds.reduce((a,b)=>a+b,0)/speeds.length).toFixed(1) + ' km/t' : '–';
+    document.getElementById('stat-best').textContent = best ? best.avgPulse + ' bpm' : '–';
+  } else {
+    ['stat-avg-pulse','stat-in-zone','stat-avg-speed','stat-best'].forEach(id => document.getElementById(id).textContent = '–');
+  }
+  const last = filtered[0];
+  document.getElementById('stat-last').textContent = last ? new Date(last.date).toLocaleDateString('no-NO', {day:'numeric',month:'short'}) : '–';
+
+  const chartArea = document.getElementById('prog-chart-area');
+  const pointsWithPulse = sorted.filter(e => e.avgPulse);
+  if (pointsWithPulse.length < 2) {
+    chartArea.innerHTML = '<div class="no-chart">' + (pointsWithPulse.length === 0 ? 'Ingen data ennå – logg noen økter!' : 'Logg minst 2 økter for å se grafen') + '</div>';
+    return;
+  }
+
+  const pulses = pointsWithPulse.map(e => e.avgPulse);
+  const minP = Math.min(...pulses, z.lo) - 5;
+  const maxP = Math.max(...pulses, z.hi) + 5;
+  const W = 340, H = 140, PL = 36, PT = 10, PB = 20;
+  const chartW = W - PL, chartH = H - PT - PB;
+  const toX = i => PL + i * chartW / (pointsWithPulse.length - 1);
+  const toY = v => PT + chartH - (v - minP) / (maxP - minP) * chartH;
+  const zoneY1 = toY(z.hi), zoneY2 = toY(z.lo);
+
+  const labels = pointsWithPulse.map((e, i) => {
+    const d = new Date(e.date);
+    if (pointsWithPulse.length <= 6 || i === 0 || i === pointsWithPulse.length - 1 || i % Math.ceil(pointsWithPulse.length / 5) === 0) {
+      return `<text x="${toX(i)}" y="${H}" class="chart-label" text-anchor="middle" fill="#6b6455">${d.getDate()}/${d.getMonth()+1}</text>`;
+    }
+    return '';
+  }).join('');
+
+  const yLabels = [z.lo, z.hi, Math.round((z.lo + z.hi) / 2)].map(v =>
+    `<text x="${PL - 4}" y="${toY(v) + 4}" class="chart-label" text-anchor="end" fill="#6b6455">${v}</text>`
+  ).join('');
+
+  const linePath = pointsWithPulse.map((e, i) => `${i === 0 ? 'M' : 'L'}${toX(i)},${toY(e.avgPulse)}`).join(' ');
+  const areaPath = pointsWithPulse.map((e, i) => `${i === 0 ? 'M' : 'L'}${toX(i)},${toY(e.avgPulse)}`).join(' ') +
+    ` L${toX(pointsWithPulse.length-1)},${PT+chartH} L${PL},${PT+chartH} Z`;
+
+  const dots = pointsWithPulse.map((e, i) => {
+    const col = e.avgPulse < z.lo ? '#5b9de0' : e.avgPulse > z.hi ? '#e05b5b' : '#4caf8a';
+    return `<circle cx="${toX(i)}" cy="${toY(e.avgPulse)}" r="4" fill="${col}" stroke="var(--bg)" stroke-width="2"/>`;
+  }).join('');
+
+  chartArea.innerHTML = `<svg class="line-chart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4caf8a" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#4caf8a" stop-opacity="0"/>
+    </linearGradient></defs>
+    <rect x="${PL}" y="${zoneY1}" width="${chartW}" height="${zoneY2-zoneY1}" fill="rgba(245,166,35,0.08)" rx="2"/>
+    <line x1="${PL}" y1="${zoneY1}" x2="${W}" y2="${zoneY1}" stroke="rgba(245,166,35,0.3)" stroke-width="1" stroke-dasharray="4,3"/>
+    <line x1="${PL}" y1="${zoneY2}" x2="${W}" y2="${zoneY2}" stroke="rgba(245,166,35,0.3)" stroke-width="1" stroke-dasharray="4,3"/>
+    ${yLabels}
+    <path d="${areaPath}" fill="url(#ag)"/>
+    <path d="${linePath}" fill="none" stroke="#4caf8a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+    ${labels}
+  </svg>`;
+}
+
+load();
+</script>
+</body>
+</html>
